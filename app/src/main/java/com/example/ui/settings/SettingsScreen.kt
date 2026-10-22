@@ -131,6 +131,7 @@ fun SettingsScreen(
       backgroundColor = bgColor,
       accentColor = borderColor,
       minimalConfig = uiState.minimalBackgroundConfig,
+      isPowerSaving = uiState.isPowerSaving,
       modifier = modifier
     ) {
       BoxWithConstraints(

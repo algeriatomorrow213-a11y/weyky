@@ -2,6 +2,8 @@ package com.example.ui.theme
 
 import android.graphics.BitmapFactory
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,7 +11,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -30,6 +34,8 @@ fun WeykyThemedBackground(
   accentColor: Color,
   minimalConfig: MinimalBackgroundConfig,
   modifier: Modifier = Modifier,
+  isPowerSaving: Boolean = false,
+  coreCenterFraction: Offset = Offset(0.5f, 0.46f),
   content: @Composable () -> Unit
 ) {
   Box(
@@ -47,7 +53,9 @@ fun WeykyThemedBackground(
             Modifier.modernCinematicBackground(
               visualState = visualState,
               isLightMode = isLightMode,
-              accentColor = accentColor
+              accentColor = accentColor,
+              isPowerSaving = isPowerSaving,
+              coreCenterFraction = coreCenterFraction
             )
           }
           WeykyThemeStyle.MINIMAL -> {
@@ -73,50 +81,97 @@ fun WeykyThemedBackground(
 /**
  * Modern Cinematic Background:
  * Deep midnight gradient with a smooth, soft radial ambient glow centered behind the core.
- * Color shifts smoothly based on CoreVisualState without abrupt brightness jumps or music flashing.
+ *
+ * Requirements:
+ * - Color directly derived from actual core state:
+ *     Idle: Sky Blue #00D2FF
+ *     Listening: Pinkish Purple #D946EF
+ *     Speaking (RESPONDING): Amber #F59E0B
+ *     Music: Emerald Green #10B981
+ *     Charging: Green #22C55E
+ * - Smooth color transition via tween(750) without flickering or abrupt steps.
+ * - Notifications and temporary cards do NOT alter the background glow color.
+ * - Fixed glow intensity and radius; music spectrum visualizer remains localized to core and
+ *   does not cause background pulsing.
+ * - Center of glow follows adaptive core layout position smoothly.
+ * - Battery saver mode reduces rendering load and animation overhead.
  */
 @Composable
 fun Modifier.modernCinematicBackground(
   visualState: CoreVisualState,
   isLightMode: Boolean,
-  accentColor: Color
+  accentColor: Color,
+  isPowerSaving: Boolean = false,
+  coreCenterFraction: Offset = Offset(0.5f, 0.46f)
 ): Modifier {
-  val targetGlowColor = when (visualState) {
-    CoreVisualState.IDLE -> if (isLightMode) Color(0xFF0284C7) else Color(0xFF00B4D8)
-    CoreVisualState.LISTENING -> JarvisHudColors.MagentaPulse
-    CoreVisualState.PROCESSING -> Color(0xFF7209B7)
-    CoreVisualState.RESPONDING -> JarvisHudColors.HologramCyan
-    CoreVisualState.SUCCESS -> Color(0xFF06D6A0)
-    CoreVisualState.MUSIC -> JarvisHudColors.NeonGreen
-    CoreVisualState.CHARGING -> JarvisHudColors.TacticalAmber
-    CoreVisualState.CALL -> Color(0xFF2A9D8F)
-    CoreVisualState.NOTIFICATION -> Color(0xFFFB8500)
-    CoreVisualState.ERROR -> JarvisHudColors.CrimsonAlert
+  // Retain last active state eligible to affect background ambient glow.
+  // Rule: Notifications and temporary cards MUST NOT alter the background glow color.
+  var lastEligibleState by remember { mutableStateOf(CoreVisualState.IDLE) }
+  if (visualState != CoreVisualState.NOTIFICATION) {
+    lastEligibleState = visualState
+  }
+
+  // Exact color mapping per specification:
+  // - Idle: Sky Blue #00D2FF
+  // - Listening: Pinkish Purple #D946EF
+  // - Speaking: Amber #F59E0B (RESPONDING)
+  // - Music: Emerald Green #10B981
+  // - Charging: Green #22C55E
+  val targetGlowColor = when (lastEligibleState) {
+    CoreVisualState.IDLE -> if (isLightMode) Color(0xFF0284C7) else Color(0xFF00D2FF)
+    CoreVisualState.LISTENING -> Color(0xFFD946EF)
+    CoreVisualState.PROCESSING -> Color(0xFFD946EF)
+    CoreVisualState.RESPONDING -> Color(0xFFF59E0B)
+    CoreVisualState.MUSIC -> Color(0xFF10B981)
+    CoreVisualState.CHARGING -> Color(0xFF22C55E)
+    CoreVisualState.SUCCESS -> Color(0xFF10B981)
+    CoreVisualState.CALL -> if (isLightMode) Color(0xFF0284C7) else Color(0xFF00D2FF)
+    CoreVisualState.NOTIFICATION -> if (isLightMode) Color(0xFF0284C7) else Color(0xFF00D2FF)
+    CoreVisualState.ERROR -> Color(0xFFEF4444)
   }
 
   val animatedGlowColor by animateColorAsState(
     targetValue = targetGlowColor,
-    animationSpec = tween(durationMillis = 600),
+    animationSpec = if (isPowerSaving) snap() else tween(durationMillis = 750),
     label = "modernAmbientGlow"
+  )
+
+  val animatedCenterX by animateFloatAsState(
+    targetValue = coreCenterFraction.x,
+    animationSpec = if (isPowerSaving) snap() else tween(durationMillis = 600),
+    label = "glowCenterX"
+  )
+
+  val animatedCenterY by animateFloatAsState(
+    targetValue = coreCenterFraction.y,
+    animationSpec = if (isPowerSaving) snap() else tween(durationMillis = 600),
+    label = "glowCenterY"
   )
 
   val baseGradient = if (isLightMode) {
     listOf(Color(0xFFE2E8F0), Color(0xFFCBD5E1), Color(0xFFF1F5F9))
   } else {
-    listOf(Color(0xFF040711), Color(0xFF080E1C), Color(0xFF0C1428))
+    listOf(Color(0xFF030712), Color(0xFF070D1B), Color(0xFF0B132B))
   }
 
   return this
     .background(Brush.verticalGradient(baseGradient))
     .drawBehind {
-      val glowCenter = Offset(size.width * 0.5f, size.height * 0.46f)
-      val glowRadius = (size.width * 0.75f).coerceAtLeast(320.dp.toPx())
+      val glowCenter = Offset(size.width * animatedCenterX, size.height * animatedCenterY)
+      // Constant glow radius independent of state transitions or music audio levels
+      val glowRadius = (minOf(size.width, size.height) * 0.95f).coerceAtLeast(320.dp.toPx())
 
-      val glowAlpha = if (isLightMode) 0.12f else 0.22f
+      // Fixed glow alpha to prevent pulsation or brightness shifts during state transitions
+      val glowAlpha = if (isPowerSaving) {
+        if (isLightMode) 0.10f else 0.16f
+      } else {
+        if (isLightMode) 0.14f else 0.22f
+      }
+
       val glowBrush = Brush.radialGradient(
         colors = listOf(
           animatedGlowColor.copy(alpha = glowAlpha),
-          animatedGlowColor.copy(alpha = glowAlpha * 0.45f),
+          animatedGlowColor.copy(alpha = glowAlpha * 0.40f),
           Color.Transparent
         ),
         center = glowCenter,

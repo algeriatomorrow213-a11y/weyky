@@ -20,8 +20,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -32,7 +35,6 @@ import com.example.device.battery.ChargingState
 import com.example.ui.adaptive.AdaptiveLayoutMode
 import com.example.ui.adaptive.AdaptiveOrientation
 import com.example.ui.adaptive.CardDensity
-import androidx.compose.runtime.CompositionLocalProvider
 import com.example.ui.adaptive.DevicePosture
 import com.example.ui.adaptive.DeviceProfile
 import com.example.ui.adaptive.rememberAdaptiveLayoutState
@@ -68,31 +70,47 @@ fun HomeScreen(
   val textSecondary = JarvisHudColors.textSecondary(isLight)
   val textMuted = JarvisHudColors.textMuted(isLight)
 
-  CompositionLocalProvider(LocalWeykyThemeStyle provides uiState.themeStyle) {
-    WeykyThemedBackground(
-      themeStyle = uiState.themeStyle,
-      visualState = uiState.visualState,
-      isLightMode = isLight,
-      backgroundColor = bgColor,
-      accentColor = borderColor,
-      minimalConfig = uiState.minimalBackgroundConfig,
-      modifier = modifier
-    ) {
-      BoxWithConstraints(
-        modifier = Modifier
-          .fillMaxSize()
-          .statusBarsPadding()
-          .navigationBarsPadding()
-          .imePadding()
-          .testTag("home_screen_root")
-      ) {
+  BoxWithConstraints(
+    modifier = modifier.fillMaxSize()
+  ) {
     // Resolve dynamic adaptive layout profile for current window bounds
     val deviceProfile = rememberAdaptiveLayoutState(
       containerWidthDp = maxWidth,
       containerHeightDp = maxHeight
     )
 
-    when (deviceProfile.layoutMode) {
+    // Dynamically calculate the center of the core for seamless background glow alignment
+    val coreCenterFraction = remember(deviceProfile.layoutMode, deviceProfile.posture) {
+      when {
+        deviceProfile.posture == DevicePosture.BOOK -> Offset(0.25f, 0.50f)
+        deviceProfile.layoutMode == AdaptiveLayoutMode.FOLDABLE_TABLETOP -> Offset(0.5f, 0.28f)
+        deviceProfile.layoutMode == AdaptiveLayoutMode.PHONE_LANDSCAPE -> Offset(0.5f, 0.42f)
+        deviceProfile.layoutMode == AdaptiveLayoutMode.SPLIT_SCREEN_COMPACT -> Offset(0.5f, 0.38f)
+        else -> Offset(0.5f, 0.46f)
+      }
+    }
+
+    CompositionLocalProvider(LocalWeykyThemeStyle provides uiState.themeStyle) {
+      WeykyThemedBackground(
+        themeStyle = uiState.themeStyle,
+        visualState = uiState.visualState,
+        isLightMode = isLight,
+        backgroundColor = bgColor,
+        accentColor = borderColor,
+        minimalConfig = uiState.minimalBackgroundConfig,
+        isPowerSaving = uiState.isPowerSaving,
+        coreCenterFraction = coreCenterFraction,
+        modifier = Modifier.fillMaxSize()
+      ) {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
+            .testTag("home_screen_root")
+        ) {
+          when (deviceProfile.layoutMode) {
       AdaptiveLayoutMode.PHONE_LANDSCAPE -> {
         PhoneLandscapeHomeScreen(
           uiState = uiState,
@@ -227,9 +245,10 @@ fun HomeScreen(
         onLaunchApp = onLaunchApp
       )
     }
+        }
+      }
+    }
   }
-}
-}
 }
 
 /**

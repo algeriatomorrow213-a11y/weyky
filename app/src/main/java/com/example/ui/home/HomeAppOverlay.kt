@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.LruCache
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -132,6 +133,52 @@ fun AppSurfaceOverlay(
     }
   }
 
+  val themeStyle = com.example.ui.theme.LocalWeykyThemeStyle.current
+
+  val overlayBgModifier = when (themeStyle) {
+    com.example.ui.theme.WeykyThemeStyle.TACTICAL -> Modifier
+      .fillMaxSize()
+      .jarvisTacticalBackground(backgroundColor = backgroundColor, accentColor = borderColor)
+    com.example.ui.theme.WeykyThemeStyle.MODERN -> Modifier
+      .fillMaxSize()
+      .background(
+        androidx.compose.ui.graphics.Brush.verticalGradient(
+          if (isLightMode) {
+            listOf(Color(0xFFE2E8F0), Color(0xFFF1F5F9))
+          } else {
+            listOf(Color(0xFF040814), Color(0xFF081020), Color(0xFF0C162A))
+          }
+        )
+      )
+    com.example.ui.theme.WeykyThemeStyle.MINIMAL -> Modifier
+      .fillMaxSize()
+      .background(if (isLightMode) Color(0xFFF8FAFC) else Color(0xFF0A0D14))
+  }
+
+  val headerTag = when (themeStyle) {
+    com.example.ui.theme.WeykyThemeStyle.TACTICAL -> "SYS.MODULES // INSTALLED APPS"
+    com.example.ui.theme.WeykyThemeStyle.MODERN -> "APPS // MODERN MATRIX"
+    com.example.ui.theme.WeykyThemeStyle.MINIMAL -> "APPS // INSTALLED"
+  }
+
+  val searchShape = when (themeStyle) {
+    com.example.ui.theme.WeykyThemeStyle.TACTICAL -> CutCornerShape(12.dp)
+    com.example.ui.theme.WeykyThemeStyle.MODERN -> RoundedCornerShape(16.dp)
+    com.example.ui.theme.WeykyThemeStyle.MINIMAL -> RoundedCornerShape(12.dp)
+  }
+
+  val searchFocusedBg = when (themeStyle) {
+    com.example.ui.theme.WeykyThemeStyle.TACTICAL -> panelBg
+    com.example.ui.theme.WeykyThemeStyle.MODERN -> panelBg.copy(alpha = 0.55f)
+    com.example.ui.theme.WeykyThemeStyle.MINIMAL -> panelBg.copy(alpha = 0.90f)
+  }
+
+  val searchUnfocusedBg = when (themeStyle) {
+    com.example.ui.theme.WeykyThemeStyle.TACTICAL -> panelBgElevated
+    com.example.ui.theme.WeykyThemeStyle.MODERN -> panelBgElevated.copy(alpha = 0.45f)
+    com.example.ui.theme.WeykyThemeStyle.MINIMAL -> panelBgElevated.copy(alpha = 0.85f)
+  }
+
   Surface(
     modifier = modifier
       .fillMaxSize()
@@ -139,15 +186,13 @@ fun AppSurfaceOverlay(
     color = backgroundColor.copy(alpha = 0.98f)
   ) {
     Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .jarvisTacticalBackground(backgroundColor = backgroundColor, accentColor = borderColor)
+      modifier = overlayBgModifier
         .padding(
           horizontal = deviceProfile.contentPaddingHorizontalDp,
           vertical = deviceProfile.contentPaddingVerticalDp + 8.dp
         )
     ) {
-      // Tactical App Matrix Header
+      // App Matrix Header
       Row(
         modifier = Modifier
           .fillMaxWidth()
@@ -157,9 +202,9 @@ fun AppSurfaceOverlay(
       ) {
         Column {
           Text(
-            text = "SYS.MODULES // INSTALLED APPS",
+            text = headerTag,
             fontSize = 10.sp,
-            fontFamily = FontFamily.Monospace,
+            fontFamily = if (themeStyle == com.example.ui.theme.WeykyThemeStyle.TACTICAL) FontFamily.Monospace else FontFamily.Default,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.5.sp,
             color = borderColor
@@ -191,7 +236,7 @@ fun AppSurfaceOverlay(
         }
       }
 
-      // Tactical Search Box
+      // Search Box
       OutlinedTextField(
         value = searchQuery,
         onValueChange = { searchQuery = it },
@@ -210,14 +255,14 @@ fun AppSurfaceOverlay(
         },
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
-          focusedContainerColor = panelBg,
-          unfocusedContainerColor = panelBgElevated,
+          focusedContainerColor = searchFocusedBg,
+          unfocusedContainerColor = searchUnfocusedBg,
           focusedBorderColor = borderColor,
           unfocusedBorderColor = borderColor.copy(alpha = 0.35f),
           focusedTextColor = textPrimary,
           unfocusedTextColor = textPrimary
         ),
-        shape = CutCornerShape(12.dp),
+        shape = searchShape,
         modifier = Modifier
           .fillMaxWidth()
           .testTag("app_search_field")

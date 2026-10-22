@@ -91,6 +91,9 @@ class MainActivity : ComponentActivity() {
                 onLaunchApp = { app ->
                   viewModel.launchApp(app)
                 },
+                onTogglePinApp = { pkg ->
+                  viewModel.togglePinApp(pkg)
+                },
                 onRequestDefaultLauncher = {
                   val intent = viewModel.createRequestRoleIntent()
                   if (intent != null) {

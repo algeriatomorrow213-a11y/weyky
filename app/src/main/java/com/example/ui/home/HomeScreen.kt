@@ -38,6 +38,7 @@ import com.example.ui.adaptive.CardDensity
 import com.example.ui.adaptive.DevicePosture
 import com.example.ui.adaptive.DeviceProfile
 import com.example.ui.adaptive.rememberAdaptiveLayoutState
+import com.example.ui.home.desktop.DesktopLandscapeHomeScreen
 import com.example.ui.theme.JarvisHudColors
 import com.example.ui.theme.LocalWeykyThemeStyle
 import com.example.ui.theme.WeykyThemedBackground
@@ -54,6 +55,7 @@ fun HomeScreen(
   onConfirmOption: (String) -> Unit,
   onToggleAppDrawer: () -> Unit = {},
   onLaunchApp: (AppMatch) -> Unit = {},
+  onTogglePinApp: (String) -> Unit = {},
   onRequestDefaultLauncher: () -> Unit = {},
   onToggleMediaPlayback: () -> Unit = { onQuerySubmit("أوقف الموسيقى") },
   onNextMediaTrack: () -> Unit = { onQuerySubmit("الأغنية التالية") },
@@ -112,7 +114,7 @@ fun HomeScreen(
         ) {
           when (deviceProfile.layoutMode) {
       AdaptiveLayoutMode.PHONE_LANDSCAPE -> {
-        PhoneLandscapeHomeScreen(
+        DesktopLandscapeHomeScreen(
           uiState = uiState,
           deviceProfile = deviceProfile,
           borderColor = borderColor,
@@ -128,7 +130,8 @@ fun HomeScreen(
           onRequestPermission = onRequestPermission,
           onToggleVoice = onToggleVoice,
           onConfirmOption = onConfirmOption,
-          onToggleAppDrawer = onToggleAppDrawer,
+          onLaunchApp = onLaunchApp,
+          onTogglePinApp = onTogglePinApp,
           onToggleMediaPlayback = onToggleMediaPlayback,
           onNextMediaTrack = onNextMediaTrack,
           onPreviousMediaTrack = onPreviousMediaTrack,
@@ -154,6 +157,8 @@ fun HomeScreen(
           onToggleVoice = onToggleVoice,
           onConfirmOption = onConfirmOption,
           onToggleAppDrawer = onToggleAppDrawer,
+          onLaunchApp = onLaunchApp,
+          onTogglePinApp = onTogglePinApp,
           onToggleMediaPlayback = onToggleMediaPlayback,
           onNextMediaTrack = onNextMediaTrack,
           onPreviousMediaTrack = onPreviousMediaTrack,
@@ -708,6 +713,8 @@ private fun TabletExpandedHomeScreen(
   onToggleVoice: () -> Unit,
   onConfirmOption: (String) -> Unit,
   onToggleAppDrawer: () -> Unit,
+  onLaunchApp: (AppMatch) -> Unit = {},
+  onTogglePinApp: (String) -> Unit = {},
   onToggleMediaPlayback: () -> Unit,
   onNextMediaTrack: () -> Unit,
   onPreviousMediaTrack: () -> Unit,
@@ -840,9 +847,9 @@ private fun TabletExpandedHomeScreen(
       }
     }
 
-    // 2. Landscape Tablet: Three-column tactical layout with centered core and flanking panels
+    // 2. Landscape Tablet: Full desktop workstation layout
     isLandscape -> {
-      LandscapeThreeColumnHomeScreen(
+      DesktopLandscapeHomeScreen(
         uiState = uiState,
         deviceProfile = deviceProfile,
         borderColor = borderColor,
@@ -858,7 +865,8 @@ private fun TabletExpandedHomeScreen(
         onRequestPermission = onRequestPermission,
         onToggleVoice = onToggleVoice,
         onConfirmOption = onConfirmOption,
-        onToggleAppDrawer = onToggleAppDrawer,
+        onLaunchApp = onLaunchApp,
+        onTogglePinApp = onTogglePinApp,
         onToggleMediaPlayback = onToggleMediaPlayback,
         onNextMediaTrack = onNextMediaTrack,
         onPreviousMediaTrack = onPreviousMediaTrack,

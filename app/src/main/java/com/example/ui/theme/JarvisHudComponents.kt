@@ -97,6 +97,25 @@ object JarvisHudColors {
 }
 
 @Composable
+fun weykyControlShape(
+  tacticalCut: Dp = 8.dp,
+  modernRadius: Dp = 12.dp,
+  minimalRadius: Dp = 8.dp
+): androidx.compose.ui.graphics.Shape {
+  val themeStyle = LocalWeykyThemeStyle.current
+  return when (themeStyle) {
+    WeykyThemeStyle.TACTICAL -> CutCornerShape(
+      topStart = tacticalCut,
+      bottomEnd = tacticalCut,
+      topEnd = (tacticalCut / 3).coerceAtLeast(2.dp),
+      bottomStart = (tacticalCut / 3).coerceAtLeast(2.dp)
+    )
+    WeykyThemeStyle.MODERN -> androidx.compose.foundation.shape.RoundedCornerShape(modernRadius)
+    WeykyThemeStyle.MINIMAL -> androidx.compose.foundation.shape.RoundedCornerShape(minimalRadius)
+  }
+}
+
+@Composable
 fun JarvisHudBadge(
   accentColor: Color,
   containerColor: Color,
@@ -113,20 +132,20 @@ fun JarvisHudBadge(
       topEnd = (cutSize / 3).coerceAtLeast(2.dp),
       bottomStart = (cutSize / 3).coerceAtLeast(2.dp)
     )
-    WeykyThemeStyle.MODERN -> androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+    WeykyThemeStyle.MODERN -> androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
     WeykyThemeStyle.MINIMAL -> androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
   }
 
   val effectiveBg = when (themeStyle) {
     WeykyThemeStyle.TACTICAL -> containerColor
-    WeykyThemeStyle.MODERN -> containerColor.copy(alpha = 0.70f)
-    WeykyThemeStyle.MINIMAL -> containerColor.copy(alpha = 0.85f)
+    WeykyThemeStyle.MODERN -> containerColor.copy(alpha = 0.55f)
+    WeykyThemeStyle.MINIMAL -> containerColor.copy(alpha = 0.88f)
   }
 
   val effectiveBorderColor = when (themeStyle) {
     WeykyThemeStyle.TACTICAL -> accentColor.copy(alpha = 0.65f)
-    WeykyThemeStyle.MODERN -> accentColor.copy(alpha = 0.45f)
-    WeykyThemeStyle.MINIMAL -> accentColor.copy(alpha = 0.25f)
+    WeykyThemeStyle.MODERN -> accentColor.copy(alpha = 0.40f)
+    WeykyThemeStyle.MINIMAL -> accentColor.copy(alpha = 0.20f)
   }
 
   var boxModifier = modifier

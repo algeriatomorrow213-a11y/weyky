@@ -126,6 +126,7 @@ data class WeykyUiState(
   val importantEvents: List<ImportantEvent> = emptyList(),
   val launcherStatus: LauncherStatus = LauncherStatus(),
   val installedApps: List<AppMatch> = emptyList(),
+  val pinnedAppPackages: List<String> = emptyList(),
   val isAppDrawerOpen: Boolean = false,
   val voiceEngineStatus: com.example.core.voice.engine.VoiceEngineStatus? = null,
   val voiceModelStatuses: Map<String, com.example.core.voice.model.ModelInstallStatus> = emptyMap(),
@@ -305,6 +306,13 @@ class WeykyViewModel(application: Application) : AndroidViewModel(application) {
         com.example.ui.theme.ThemeModeOption.AUTO -> prefs.getBoolean("is_light_mode", false)
       }
 
+      val savedPinnedAppsRaw = prefs.getString("pinned_app_packages", null)
+      val initialPinnedApps = if (!savedPinnedAppsRaw.isNullOrBlank()) {
+        savedPinnedAppsRaw.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+      } else {
+        emptyList()
+      }
+
       WeykyUiState(
         isLightMode = isLight,
         themeStyle = initialTheme,
@@ -312,6 +320,7 @@ class WeykyViewModel(application: Application) : AndroidViewModel(application) {
         minimalBackgroundConfig = minimalConfig,
         backgroundColorHex = if (initialTheme == com.example.ui.theme.WeykyThemeStyle.TACTICAL) 0xFF000000L else prefs.getLong("bg_color_hex", 0xFF000000L),
         cardBorderColorHex = prefs.getLong("border_color_hex", 0xFF00F0FFL),
+        pinnedAppPackages = initialPinnedApps,
         cloudTtsVoiceName = prefs.getString("cloud_tts_voice", com.example.core.voice.engine.EdgeNeuralTtsEngine.DEFAULT_VOICE)
           ?: com.example.core.voice.engine.EdgeNeuralTtsEngine.DEFAULT_VOICE
       )
@@ -396,6 +405,35 @@ class WeykyViewModel(application: Application) : AndroidViewModel(application) {
       _uiState.update { it.copy(isAppDrawerOpen = false) }
     }
     return launched
+  }
+
+  fun pinApp(packageName: String) {
+    if (packageName.isBlank()) return
+    val current = _uiState.value.pinnedAppPackages
+    if (current.contains(packageName)) return
+    val updated = current + packageName
+    prefs.edit().putString("pinned_app_packages", updated.joinToString(",")).apply()
+    _uiState.update { it.copy(pinnedAppPackages = updated) }
+  }
+
+  fun unpinApp(packageName: String) {
+    val current = _uiState.value.pinnedAppPackages
+    if (!current.contains(packageName)) return
+    val updated = current.filter { it != packageName }
+    prefs.edit().putString("pinned_app_packages", updated.joinToString(",")).apply()
+    _uiState.update { it.copy(pinnedAppPackages = updated) }
+  }
+
+  fun togglePinApp(packageName: String) {
+    if (packageName.isBlank()) return
+    val current = _uiState.value.pinnedAppPackages
+    val updated = if (current.contains(packageName)) {
+      current.filter { it != packageName }
+    } else {
+      current + packageName
+    }
+    prefs.edit().putString("pinned_app_packages", updated.joinToString(",")).apply()
+    _uiState.update { it.copy(pinnedAppPackages = updated) }
   }
 
   fun createRequestRoleIntent(): Intent? = launcherRoleManager.createRequestRoleIntent()

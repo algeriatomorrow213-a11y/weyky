@@ -99,6 +99,7 @@ import com.example.ui.theme.HudTabPosition
 import com.example.ui.theme.JarvisHudBadge
 import com.example.ui.theme.JarvisHudCard
 import com.example.ui.theme.JarvisHudColors
+import com.example.ui.theme.weykyControlShape
 import kotlinx.coroutines.delay
 
 @Composable
@@ -1953,7 +1954,7 @@ fun HomeResponseCard(
           Button(
             onClick = { onRequestPermission(uiState.pendingPermission.first) },
             colors = ButtonDefaults.buttonColors(containerColor = borderColor),
-            shape = CutCornerShape(8.dp),
+            shape = weykyControlShape(8.dp, 12.dp, 8.dp),
             modifier = Modifier
               .align(Alignment.End)
               .testTag("grant_permission_button")
@@ -1965,7 +1966,7 @@ fun HomeResponseCard(
           Button(
             onClick = { uiState.pendingRecoveryAction.invoke() },
             colors = ButtonDefaults.buttonColors(containerColor = borderColor),
-            shape = CutCornerShape(8.dp),
+            shape = weykyControlShape(8.dp, 12.dp, 8.dp),
             modifier = Modifier
               .align(Alignment.End)
               .testTag("recovery_action_button")

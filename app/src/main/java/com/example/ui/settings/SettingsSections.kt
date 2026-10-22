@@ -66,6 +66,7 @@ import com.example.core.voice.model.VoiceModelType
 import com.example.ui.theme.JarvisHudBadge
 import com.example.ui.theme.JarvisHudCard
 import com.example.ui.theme.JarvisHudColors
+import com.example.ui.theme.weykyControlShape
 import java.io.File
 import java.util.Locale
 
@@ -835,7 +836,7 @@ fun LauncherSettingsContent(
         Button(
           onClick = onRequestDefaultLauncher,
           colors = ButtonDefaults.buttonColors(containerColor = borderColor),
-          shape = CutCornerShape(topStart = 8.dp, bottomEnd = 8.dp, topEnd = 2.dp, bottomStart = 2.dp),
+          shape = weykyControlShape(8.dp, 12.dp, 8.dp),
           modifier = Modifier.testTag("request_default_launcher_button")
         ) {
           Text("تعيين كافتراضي", fontSize = 12.sp, color = JarvisHudColors.PitchBlack, fontWeight = FontWeight.Bold)
@@ -1059,7 +1060,7 @@ fun VoiceSettingsContent(
             modifier = Modifier
               .fillMaxWidth()
               .testTag("test_hybrid_voice_button"),
-            shape = CutCornerShape(topStart = 8.dp, bottomEnd = 8.dp, topEnd = 2.dp, bottomStart = 2.dp),
+            shape = weykyControlShape(8.dp, 12.dp, 8.dp),
             border = BorderStroke(1.dp, borderColor)
           ) {
             Icon(Icons.Default.PlayArrow, contentDescription = null, tint = borderColor, modifier = Modifier.size(16.dp))
@@ -1229,7 +1230,7 @@ fun VoiceSettingsContent(
                   Button(
                     onClick = { onSelectActiveTtsModel(modelInfo) },
                     colors = ButtonDefaults.buttonColors(containerColor = borderColor),
-                    shape = CutCornerShape(6.dp),
+                    shape = weykyControlShape(6.dp, 10.dp, 6.dp),
                     modifier = Modifier
                       .weight(1f)
                       .testTag("activate_model_${modelInfo.id}")
@@ -1261,7 +1262,7 @@ fun VoiceSettingsContent(
                 Button(
                   onClick = { onDeleteModel(modelInfo) },
                   colors = ButtonDefaults.buttonColors(containerColor = Color(0x33FF2A54)),
-                  shape = CutCornerShape(6.dp),
+                  shape = weykyControlShape(6.dp, 10.dp, 6.dp),
                   modifier = Modifier.testTag("delete_model_${modelInfo.id}")
                 ) {
                   Text("حذف", fontSize = 11.sp, color = JarvisHudColors.CrimsonAlert, fontWeight = FontWeight.Bold)
@@ -1288,7 +1289,7 @@ fun VoiceSettingsContent(
                 Button(
                   onClick = { onInstallModel(modelInfo) },
                   colors = ButtonDefaults.buttonColors(containerColor = JarvisHudColors.NeonGreen),
-                  shape = CutCornerShape(topStart = 8.dp, bottomEnd = 8.dp, topEnd = 2.dp, bottomStart = 2.dp),
+                  shape = weykyControlShape(8.dp, 12.dp, 8.dp),
                   modifier = Modifier
                     .weight(1f)
                     .testTag("install_model_${modelInfo.id}")
@@ -1300,7 +1301,7 @@ fun VoiceSettingsContent(
                   colors = ButtonDefaults.buttonColors(
                     containerColor = if (isLight) Color(0xFFDCE8F4) else Color(0xFF0A2239)
                   ),
-                  shape = CutCornerShape(6.dp),
+                  shape = weykyControlShape(6.dp, 10.dp, 6.dp),
                   modifier = Modifier.testTag("redownload_model_${modelInfo.id}")
                 ) {
                   Text("إعادة تنزيل", fontSize = 11.sp, color = borderColor)
@@ -1310,7 +1311,7 @@ fun VoiceSettingsContent(
                 Button(
                   onClick = { onDownloadModel(modelInfo) },
                   colors = ButtonDefaults.buttonColors(containerColor = borderColor),
-                  shape = CutCornerShape(topStart = 7.dp, bottomEnd = 7.dp, topEnd = 2.dp, bottomStart = 2.dp),
+                  shape = weykyControlShape(7.dp, 12.dp, 8.dp),
                   modifier = Modifier
                     .weight(1f)
                     .testTag("download_model_${modelInfo.id}")
@@ -1338,7 +1339,7 @@ fun VoiceSettingsContent(
                   colors = ButtonDefaults.buttonColors(
                     containerColor = JarvisHudColors.NeonGreen
                   ),
-                  shape = CutCornerShape(topStart = 7.dp, bottomEnd = 7.dp, topEnd = 2.dp, bottomStart = 2.dp),
+                  shape = weykyControlShape(7.dp, 12.dp, 8.dp),
                   modifier = Modifier
                     .weight(1f)
                     .testTag("install_model_${modelInfo.id}")
@@ -1438,7 +1439,7 @@ fun PermissionsSettingsContent(
           } catch (_: Exception) {}
         },
         colors = ButtonDefaults.buttonColors(containerColor = if (isLight) Color(0xFFDCE8F4) else Color(0xFF071A30)),
-        shape = CutCornerShape(topStart = 8.dp, bottomEnd = 8.dp, topEnd = 2.dp, bottomStart = 2.dp),
+        shape = weykyControlShape(8.dp, 12.dp, 8.dp),
         modifier = Modifier.testTag("open_notification_settings_button")
       ) {
         Text("الإعدادات", fontSize = 12.sp, color = borderColor)

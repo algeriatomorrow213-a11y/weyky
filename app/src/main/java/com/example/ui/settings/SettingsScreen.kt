@@ -313,10 +313,15 @@ private fun LandscapeDesktopSettingsLayout(
           }
         }
         Column(modifier = Modifier.padding(start = 10.dp)) {
+          val settingsHeaderTag = when (uiState.themeStyle) {
+            WeykyThemeStyle.TACTICAL -> "SYS.CONFIG // TACTICAL"
+            WeykyThemeStyle.MODERN -> "SYS.CONFIG // MODERN GLASS"
+            WeykyThemeStyle.MINIMAL -> "SYS.CONFIG // MINIMAL CALM"
+          }
           Text(
-            text = "SYS.CONFIG // TACTICAL",
+            text = settingsHeaderTag,
             fontSize = 8.sp,
-            fontFamily = FontFamily.Monospace,
+            fontFamily = if (uiState.themeStyle == WeykyThemeStyle.TACTICAL) FontFamily.Monospace else FontFamily.Default,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.2.sp,
             color = borderColor.copy(alpha = 0.8f)
@@ -339,7 +344,11 @@ private fun LandscapeDesktopSettingsLayout(
       ) {
         SettingsCategory.entries.forEach { category ->
           val isSelected = category == selectedCategory
-          val itemShape = CutCornerShape(topStart = 8.dp, bottomEnd = 8.dp, topEnd = 2.dp, bottomStart = 2.dp)
+          val itemShape = when (uiState.themeStyle) {
+            WeykyThemeStyle.TACTICAL -> CutCornerShape(topStart = 8.dp, bottomEnd = 8.dp, topEnd = 2.dp, bottomStart = 2.dp)
+            WeykyThemeStyle.MODERN -> androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+            WeykyThemeStyle.MINIMAL -> androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+          }
 
           Box(
             modifier = Modifier
@@ -681,10 +690,15 @@ private fun PortraitSettingsLayout(
           }
         }
         Column(modifier = Modifier.padding(start = 12.dp)) {
+          val portraitSettingsHeaderTag = when (uiState.themeStyle) {
+            WeykyThemeStyle.TACTICAL -> "SYS.CONFIG // TACTICAL PARAMETERS"
+            WeykyThemeStyle.MODERN -> "SYS.CONFIG // MODERN GLASS"
+            WeykyThemeStyle.MINIMAL -> "SYS.CONFIG // MINIMAL CALM"
+          }
           Text(
-            text = "SYS.CONFIG // TACTICAL PARAMETERS",
+            text = portraitSettingsHeaderTag,
             fontSize = 9.sp,
-            fontFamily = FontFamily.Monospace,
+            fontFamily = if (uiState.themeStyle == WeykyThemeStyle.TACTICAL) FontFamily.Monospace else FontFamily.Default,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.5.sp,
             color = borderColor.copy(alpha = 0.8f)
